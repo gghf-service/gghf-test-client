@@ -3,8 +3,8 @@ import 'subscription.dart';
 import 'dart:convert';
 
 class ApiClient {
-  static final String _baseUrl = 'http://127.0.0.1:5000/';
-  static final String _subscriptionResource = _baseUrl + 'subscriber';
+  static String baseUrl = 'localhost:5000';
+  static final String _subscriptionResource = baseUrl + '/subscriber';
   final client = http.Client();
 
   Future<List<Subscription>> fetchSubscriptions(String deviceId) async {
@@ -22,9 +22,11 @@ class ApiClient {
     );
   }
 
-  void removeSubscription(Subscription subscription) async {
+  Future<http.StreamedResponse> removeSubscription(Subscription subscription) async {
+    final body = jsonEncode([subscription.toJson()]);
     final request = http.Request('DELETE', Uri.parse(_subscriptionResource));
-    request.bodyFields = subscription.toJson();
-    await client.send(request);
+    request.body = body;
+    request.headers['Content-type'] = 'application/json';
+    return await client.send(request);
   }
 }

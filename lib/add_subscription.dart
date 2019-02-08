@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gghf_test_client/gghf/subscription.dart';
+import 'instance_id.dart';
 
 class AddSubscription extends StatefulWidget {
   @override
@@ -48,9 +49,10 @@ class _AddSubscriptionState extends State<AddSubscription> {
               controller: region,
             ),
             RaisedButton(
-              onPressed: () {
+              onPressed: () async {
+                final id = await instanceId();
                 final sub = Subscription(
-                  device: '1234',
+                  device: id,
                   platform: platform.text,
                   appid: appid.text,
                   region: region.text,
