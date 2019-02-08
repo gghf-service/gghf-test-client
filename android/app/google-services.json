@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "764966910967",
+    "firebase_url": "https://steamyapp-1a37c.firebaseio.com",
+    "project_id": "steamyapp-1a37c",
+    "storage_bucket": "steamyapp-1a37c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764966910967:android:0d96292c9983f526",
+        "android_client_info": {
+          "package_name": "com.tapkain.gghftestclient"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "764966910967-kii7dve1lo9fktuu91eohshq3b2hablv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6ZRdUANB0p5C5MD0wQEhWE5LMls7PEOo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

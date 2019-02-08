@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gghf_test_client/gghf/subscription.dart';
+import 'package:gghf_test_client/gghf/api_client.dart';
+import 'add_subscription.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,57 +28,85 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List<Subscription> _subscriptions = List();
+  final _api = ApiClient();
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    _refreshSubs();
+    super.initState();
+  }
+
+  Widget _cardRow(BuildContext context, String label, String value) {
+    final theme = Theme.of(context).textTheme;
+    return Row(
+      children: <Widget>[
+        Text(
+          label,
+          style: theme.title,
+        ),
+        SizedBox(
+          width: 8,
+        ),
+        Text(value, style: theme.title)
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
+      body: Container(
+        padding: EdgeInsets.all(16),
+        child: RefreshIndicator(
+          onRefresh: _refreshSubs,
+          child: ListView.builder(
+            itemCount: _subscriptions.length,
+            itemBuilder: (BuildContext context, int index) {
+              final sub = _subscriptions[index];
+              return Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: <Widget>[
+                      _cardRow(context, 'Platform', '${sub.platform}'),
+                      _cardRow(context, 'AppId', '${sub.appid}'),
+                      _cardRow(context, 'Region', '${sub.region}'),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: _addSubscription,
+        tooltip: 'Subscribe',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
+  }
+
+  void _addSubscription() async {
+    final subscription = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddSubscription()),
+    );
+    await _api.subscribe(subscription);
+    setState(() {
+      _subscriptions.add(subscription);
+    });
+  }
+
+  Future<Null> _refreshSubs() {
+    return _api.fetchSubscriptions('1234').then((subs) {
+      setState(() {
+        _subscriptions = subs;
+      });
+    });
   }
 }
