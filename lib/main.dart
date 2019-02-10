@@ -3,6 +3,8 @@ import 'package:gghf_test_client/gghf/subscription.dart';
 import 'package:gghf_test_client/gghf/api_client.dart';
 import 'add_subscription.dart';
 import 'instance_id.dart';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(MyApp());
@@ -32,6 +34,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Subscription> _subscriptions = List();
   final _api = ApiClient();
+  final _messaging = FirebaseMessaging();
   var endpoint = 'localhost:5000';
   final endpointController = TextEditingController();
   SharedPreferences prefs;
@@ -53,7 +56,54 @@ class _MyHomePageState extends State<MyHomePage> {
         _refreshSubs();
       });
     });
+    initMessaging();
     super.initState();
+  }
+
+  void initMessaging() {
+    _messaging.getToken().then((token) {
+      showDialog(context: context, builder: (BuildContext context) {
+        return Container(
+          alignment: Alignment.center,
+          child: Card(
+            child: Text('Firebase FCM Token - $token'),
+          ),
+        );
+      });
+    });
+
+    _messaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        showDialog(context: context, builder: (BuildContext context) {
+          return Container(
+            alignment: Alignment.center,
+            child: Card(
+              child: Text('on message $message'),
+            ),
+          );
+        });
+      },
+      onResume: (Map<String, dynamic> message) async {
+        showDialog(context: context, builder: (BuildContext context) {
+          return Container(
+            alignment: Alignment.center,
+            child: Card(
+              child: Text('on resume $message'),
+            ),
+          );
+        });
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        showDialog(context: context, builder: (BuildContext context) {
+          return Container(
+            alignment: Alignment.center,
+            child: Card(
+              child: Text('on launch $message'),
+            ),
+          );
+        });
+      },
+    );
   }
 
   Widget _cardRow(BuildContext context, String label, String value) {
@@ -117,6 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       _subscriptions.removeAt(index);
                                     });
                                     _api.removeSubscription(sub);
+                                    _messaging.unsubscribeFromTopic(sub.topic);
                                   },
                                 ),
                               ],
@@ -145,10 +196,11 @@ class _MyHomePageState extends State<MyHomePage> {
     final subscription = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AddSubscription()),
-    );
+    ) as Subscription;
     await _api.subscribe(subscription);
     setState(() {
       _subscriptions.add(subscription);
+      _messaging.subscribeToTopic(subscription.topic);
     });
   }
 

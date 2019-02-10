@@ -4,6 +4,8 @@ class Subscription {
   String appid;
   String region;
 
+  String get topic => '$platform$appid$region';
+
   Subscription({this.device, this.platform, this.appid, this.region});
 
   Subscription.fromJson(Map<String, dynamic> json) {
